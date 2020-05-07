@@ -1,0 +1,25 @@
+[SSH]
+enabled = true
+host = user@host:ssh_port
+keyname = my_private_ssh_key
+db_port = database port on remote machine
+
+[PSQL]
+db = evergreen
+host = 127.0.0.1
+port = 5432
+username = psql
+password = p@55w0rd!
+limit = 15
+
+[FOLDERS]
+output = ./output
+reports = ./sql
+ignore = ./ignore_list
+script = scripts
+php = create_ignore_list.php
+
+[EVERGREEN]
+copy_url = /eg/staff/cat/item/
+bib_url = /eg/staff/cat/catalog/record/
+patron_url = /eg/staff/circ/patron/

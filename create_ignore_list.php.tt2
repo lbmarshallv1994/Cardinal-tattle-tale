@@ -1,0 +1,37 @@
+    <?php
+    echo var_dump(\$_POST);
+    if(isset(\$_POST['reportName']) && isset(\$_POST['systemID'])) {
+        \$reportName = clean_input(\$_POST['reportName']);
+        \$systemID = clean_input(\$_POST['systemID']);
+        \$data = "INSERT INTO [%- ignore_table -%]\n VALUES\n";
+        \$entries = array();
+
+    foreach (\$_POST['copyID'] as &\$value) {
+         \$safeVal = intval(\$value);
+         array_push(\$entries,"('\$reportName',\$systemID,\$safeVal)");
+        }
+        \$data .= join(",",\$entries);
+        \$data .=";";
+        \$filename = "[%- output_dir -%]/".date('YmdHis').".sql";
+        if (!file_exists(\$filename)) {
+            \$fh = fopen(\$filename, 'w') or die("Can't create file");
+        }
+        \$ret = file_put_contents(\$filename, \$data, FILE_APPEND | LOCK_EX);
+        if(\$ret === false) {
+            die('There was an error writing this file');
+        }
+        else {
+            echo "\$ret bytes written to file";
+        }
+    }
+    else {
+       die('no post data to process');
+    }
+    
+    function clean_input(\$data) {
+      \$data = trim(\$data);
+      \$data = stripslashes(\$data);
+      \$data = htmlspecialchars(\$data);
+      return \$data;
+    }
+    ?>
