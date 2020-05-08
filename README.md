@@ -32,3 +32,22 @@ Create your tattler.ini using the provided tattler.example.ini file.
 * **copy_url:** base URL to create links to items
 * **bib_url:** base URL to create links to bib records
 * **patron_url:** base URL to create links to patrons
+
+## Prerequisites
+### Perl 
+* **recommended version:** 5.28
+#### Modules
+Use CPAN to install these modules.
+* **Template:** Used for creating the PHP form action from a supplied *.php.tt2* file
+* **DBI:** Creates a connection to a PSQL database
+* **Net::OpenSSH:** Creates an SSH tunnel to connect to a remote database
+* **Config::Tiny:** reads in your *tattler.ini* file 
+* **File::Spec:** Translates relative paths into absolute paths when generating the PHP script
+* **File::Basename:** Parses the report name out of your SQL files
+
+### PHP-FPM
+* **recommended version:** 7.3.17
+Handles PHP sent to your webserver. We're using a PHP script to update our database given user input.
+
+
+
