@@ -3,13 +3,9 @@ use warnings;
 use Template;
 use DBI;
 use Net::OpenSSH;
-use Data::Dumper;
 use Config::Tiny;
 use File::Spec;
-use File::Copy;
 use File::Basename;
-use File::Path;
-
 
 my $config = Config::Tiny->read( "tattler.ini", 'utf8' );
 #ssh host
@@ -132,7 +128,7 @@ foreach my $sql_file (@files) {
     my ($bib_id_index) = grep { $headers[$_] eq 'bib_id' } (0 .. (scalar @headers)-1);
     my ($copy_id_index) = grep { $headers[$_] eq 'copy_id' } (0 .. (scalar @headers)-1);
     my ($circ_lib_index) = grep { $headers[$_] eq 'circ_lib' } (0 .. (scalar @headers)-1);
-    #print Dumper($data);
+
     $sth->finish;
     my $current_system = 0;
     my $current_count = 1;
@@ -144,7 +140,7 @@ foreach my $sql_file (@files) {
     for(my $i = 0; $i < $l; $i++){
         my $sql_row_ref = $data[$i];
         my @sql_row = @$sql_row_ref;
-       # print Dumper(@sql_row);
+
         # set up file if this is new system
         if($sql_row[$sys_id_index] != $current_system){
             # set new current system
@@ -168,11 +164,13 @@ foreach my $sql_file (@files) {
             }
 
             # init file
+            # set up style for file
             print $current_file "<html> <style> body{font-family: arial;} .tt-table{border-collapse:collapse;} .tt-table td{padding-left: 15px; padding-top: 5px; padding-bottom: 5px; padding-right: 15px;} .tt-table thead tr{color: rgb(100, 100, 100); background-color:rgb(225, 225, 225);border-bottom-style: solid; border-bottom-width: 1.5px; border-bottom-color:rgb(200, 200, 200);  border-collapse: collapse; font-weight: bold;} .tt-table tbody td:nth-child(1){color: rgb(100, 100, 100); background-color:rgb(225, 225, 225);border-right-style: solid; border-right-width: 1.5px; border-right-color:rgb(200, 200, 200);  border-collapse: collapse; font-weight: bold;border-bottom-color:rgb(128, 200, 200) !important;} .tt-table tbody tr { border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color:rgb(221, 221, 221);  border-collapse: collapse;} .tt-table tbody tr:nth-child(odd){background-color:rgb(245, 245, 245);}  </style>";
             print $current_file "<h1>$org_name{$current_system}</h1>";
             print $current_file "<h2>$nice_report_title</h2>";
             print $current_file "<a href=\"index.html\">Return to index</a>";
             print $current_file "<hr/>";
+            # create form for user created ignore list
             print $current_file "<form action=\"$ignorephpurl\" method=\"POST\" id=\"ignoreForm\">";
             print $current_file "<input type=\"hidden\" id=\"reportName\" name=\"reportName\" value=\"$report_title\">";
             print $current_file "<input type=\"hidden\" id=\"systemID\" name=\"systemID\" value=\"$current_system\">";
@@ -188,14 +186,16 @@ foreach my $sql_file (@files) {
             print $current_file "</tr></thead>";
             print $current_file "<tbody>";
         }
-        # send staff to the right subdomain for their system
+        # send staff to the right subdomain for their system, assumed to be their system's shortname
         my $subdomain ="https://";
         $subdomain .= $org_shortname{$current_system}.".";
         my $copy_id = $sql_row[$copy_id_index];
         print $current_file "<tr>";
         print $current_file "<td>$current_count</td>";
+        # check box marks this copy to be ignored next time
         print $current_file "<td><input type=\"checkbox\" name=\"copyID[]\" value=\"$copy_id\"></td>";
         while (my ($index, $elem) = each @sql_row) {
+            # set up links to Evergreen based on header name
             if(defined($elem)){
                 if ($headers[$index] =~ m/email/ ) {
                     print $current_file "<td><a href=\"mailto:$elem\">$elem</a></td>";
@@ -235,60 +235,64 @@ foreach my $sql_file (@files) {
         close $current_file;
     }
 }
+# close connection to database       
+$dbh->disconnect;
 
 my $index_data = "<html><body><ul>";
+# build index for all webpages output
 foreach my $current_system (keys %org_shortname){
-my $current_folder = "$output_folder/$org_shortname{$current_system}";
-if(-d $current_folder){
-        $index_data .= "<li><a href=\"/$org_shortname{$current_system}\">$org_shortname{$current_system}</a></li>";
-		my @report_files;
-		opendir(DIR, $current_folder) or die $!;
-		
-		while (my $file = readdir(DIR)) 
-		{
-        next unless (-f "$current_folder/$file");
-			# Use a regular expression to find files ending in .html
-			next if (lc$file =~ m/index/);
-			next unless (lc$file =~ m/\.html$/);
-			push(@report_files,$file);
-		}
-		closedir(DIR);
-    
-    my $index_file;
-    my $index_file_name = $current_folder."/index.html";
-       unless(open $index_file, '>'.$index_file_name) {
-                die "\nUnable to create $index_file_name\n";
+    my $current_folder = "$output_folder/$org_shortname{$current_system}";
+    if(-d $current_folder){
+            # add this system to the root index
+            $index_data .= "<li><a href=\"/$org_shortname{$current_system}\">$org_shortname{$current_system}</a></li>";
+            my @report_files;
+            opendir(DIR, $current_folder) or die $!;
+            
+            while (my $file = readdir(DIR)) 
+            {
+            next unless (-f "$current_folder/$file");
+                # Use a regular expression to find files ending in .html
+                next if (lc$file =~ m/index/);
+                next unless (lc$file =~ m/\.html$/);
+                push(@report_files,$file);
             }
-		print $index_file "<html>";
-		print $index_file "<style> body{font-family: arial;}</style>";
-		print $index_file "<h1>$org_name{$current_system}</h1>";
-        print $index_file "<a href=\"../index.html\">Return to index</a>";
-        print $index_file "<hr/>\n";
-        print $index_file "<ul>\n";
-        foreach(@report_files)
-		{
-			my $file = $_;
-            my @s1 = split(/\./,$file);
-			my @s2 = split(/-/,$s1[0]);
-            my $nice_report_title = join(" ",@s2);
-			
-			 print $index_file "<li><a href=\"$file\">$nice_report_title</a></li>\n";
-		}
+            closedir(DIR);
         
-		 print $index_file "</ul>\n";
-         print $index_file "</html>";
-         close $index_file;
-}
+        my $index_file;
+        my $index_file_name = $current_folder."/index.html";
+           unless(open $index_file, '>'.$index_file_name) {
+                    die "\nUnable to create $index_file_name\n";
+                }
+            print $index_file "<html>";
+            print $index_file "<style> body{font-family: arial;}</style>";
+            print $index_file "<h1>$org_name{$current_system}</h1>";
+            print $index_file "<a href=\"../index.html\">Return to index</a>";
+            print $index_file "<hr/>\n";
+            print $index_file "<ul>\n";
+            foreach(@report_files)
+            {
+                my $file = $_;
+                my @s1 = split(/\./,$file);
+                my @s2 = split(/-/,$s1[0]);
+                my $nice_report_title = join(" ",@s2);
+                
+                 print $index_file "<li><a href=\"$file\">$nice_report_title</a></li>\n";
+            }
+            
+             print $index_file "</ul>\n";
+             print $index_file "</html>";
+             close $index_file;
+    }
 }
 $index_data .= "</ul></body></html>";
+# create root index file
 my $index_file;
 my $index_file_name = $output_folder."/index.html";
 unless(open $index_file, '>'.$index_file_name) {
         die "\nUnable to create $index_file_name\n";
     }
 print $index_file $index_data;  
-close $index_file;           
-$dbh->disconnect;
-     my $complete_time = (time() - $total_time_start)/60.0;
-     print("script finished in $complete_time minutes\n");
+close $index_file;    
+my $complete_time = (time() - $total_time_start)/60.0;
+print("script finished in $complete_time minutes\n");
      
