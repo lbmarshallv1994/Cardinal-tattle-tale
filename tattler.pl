@@ -174,6 +174,7 @@ foreach my $sql_file (@files) {
             print $current_file "<hr/>";
             # create form for user created ignore list
             print $current_file "<form action=\"$ignorephpurl\" method=\"POST\" id=\"ignoreForm\">";
+            print $current_file "<p>Check the boxes within the table to ignore to a copy. That copy will not appear on the next report that is generated.</p>";          
             print $current_file "<input type=\"hidden\" id=\"reportName\" name=\"reportName\" value=\"$report_title\">";
             print $current_file "<input type=\"hidden\" id=\"systemID\" name=\"systemID\" value=\"$current_system\">";
             print $current_file "<input type=\"submit\">";
