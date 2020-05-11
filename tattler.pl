@@ -165,7 +165,9 @@ foreach my $sql_file (@files) {
 
             # init file
             # set up style for file
-            print $current_file "<html> <style> body{font-family: arial;} .tt-table{border-collapse:collapse;} .tt-table td{padding-left: 15px; padding-top: 5px; padding-bottom: 5px; padding-right: 15px;} .tt-table thead tr{color: rgb(100, 100, 100); background-color:rgb(225, 225, 225);border-bottom-style: solid; border-bottom-width: 1.5px; border-bottom-color:rgb(200, 200, 200);  border-collapse: collapse; font-weight: bold;} .tt-table tbody td:nth-child(1){color: rgb(100, 100, 100); background-color:rgb(225, 225, 225);border-right-style: solid; border-right-width: 1.5px; border-right-color:rgb(200, 200, 200);  border-collapse: collapse; font-weight: bold;border-bottom-color:rgb(128, 200, 200) !important;} .tt-table tbody tr { border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color:rgb(221, 221, 221);  border-collapse: collapse;} .tt-table tbody tr:nth-child(odd){background-color:rgb(245, 245, 245);}  </style>";
+            # TODO: Move style stuff into a static CSS file
+            print $current_file "<html><style> 
+    input[type=\"submit\"]{display: inline-block;margin-bottom: 20px;font-weight: 400;text-align: center;white-space: nowrap;vertical-align: middle;-ms-touch-action: manipulation;touch-action: manipulation;cursor: pointer;background-image: none;border: 1px solid transparent;padding: 6px 12px;font-size: 14px;line-height: 1.42857143;border-radius: 4px; user-select: none;color: #333; background-color: #fff;border-color: #ccc; } body{font-family: arial;} .tt-table{border-collapse:collapse;} .tt-table td{padding-left: 15px; padding-top: 5px; padding-bottom: 5px; padding-right: 15px;} .tt-table thead tr{color: rgb(100, 100, 100); background-color:rgb(225, 225, 225);border-bottom-style: solid; border-bottom-width: 1.5px; border-bottom-color:rgb(200, 200, 200);  border-collapse: collapse; font-weight: bold;} .tt-table tbody td:nth-child(1){color: rgb(100, 100, 100); background-color:rgb(225, 225, 225);border-right-style: solid; border-right-width: 1.5px; border-right-color:rgb(200, 200, 200);  border-collapse: collapse; font-weight: bold;border-bottom-color:rgb(128, 200, 200) !important;} .tt-table tbody tr { border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color:rgb(221, 221, 221);  border-collapse: collapse;} .tt-table tbody tr:nth-child(odd){background-color:rgb(245, 245, 245);}</style>";
             print $current_file "<h1>$org_name{$current_system}</h1>";
             print $current_file "<h2>$nice_report_title</h2>";
             print $current_file "<a href=\"index.html\">Return to index</a>";
@@ -237,8 +239,8 @@ foreach my $sql_file (@files) {
 }
 # close connection to database       
 $dbh->disconnect;
-
-my $index_data = "<html><body><ul>";
+# begin root index 
+my $index_data = "<html><style> body{font-family: arial;}</style><body><ul>";
 # build index for all webpages output
 foreach my $current_system (keys %org_shortname){
     my $current_folder = "$output_folder/$org_shortname{$current_system}";
