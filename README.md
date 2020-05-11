@@ -1,8 +1,9 @@
 # Cardinal-tattle-tale
-Create interactive reports for copies or bib records that do not follow the cataloging best practices. 
+Create interactive reports for copies or bib records that do not follow the cataloging best practices. Output is an interactive webpage for each provided SQL file. Results are broken down per system. Users can mark records to ignore the next time that the script is run. These marked records are entered into SQL files that the script takes in to make a virtual "ignore list" table.  
 
 ## Installation
-Create the folder for your webpages to be output into, make sure the folder you create has write permissions enabled for the user that runs the script.
+Create the folder for your webpages to be output into, make sure the folder you create has write permissions enabled for the user that runs the script.  
+
 Create the folder for your ignore list to be output into, make sure this folder has write permissions for other users.
 Create your tattler.ini using the provided tattler.example.ini file. 
 
