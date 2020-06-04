@@ -15,11 +15,9 @@ limit = 15
 [FOLDERS]
 output = ./output
 reports = ./sql
-ignore = ./ignore_list
-script = scripts
-php = create_ignore_list.php
 
 [EVERGREEN]
 copy_url = /eg/staff/cat/item/
 bib_url = /eg/staff/cat/catalog/record/
 patron_url = /eg/staff/circ/patron/
+tattler_update_url = /eg/opac/tattler

@@ -34,56 +34,15 @@ my $pwrd = $config->{PSQL}{password};
 my $output_folder = $config->{FOLDERS}{output};
 # script will run every report in this folder
 my $sqldir = $config->{FOLDERS}{reports};
-# script will create table using SQL files in this folder
-# copy ids in this table will be ignored
-my $ignoredir = $config->{FOLDERS}{ignore};
-my $ignorephp = $config->{FOLDERS}{php};
-my $ignorephpdirname = $config->{FOLDERS}{script};
-my $ignorephpdir = $output_folder."/".$ignorephpdirname;
-my $ignorephpabs =  $ignorephpdir."/".$ignorephp;
-my $ignorephpurl =  "../".$ignorephpdirname."/".$ignorephp;
 # how many rows to return per report
 my $limit =  $config->{PSQL}{limit};
 my $copy_url =  $config->{EVERGREEN}{copy_url};
 my $bib_url = $config->{EVERGREEN}{bib_url};
 my $patron_url = $config->{EVERGREEN}{patron_url};
+my $tattler_url = $config->{EVERGREEN}{tattler_update_url};
 my $dbh =DBI->connect($dsn, $usr, $pwrd, {AutoCommit => 0}) or die ( "Couldn't connect to database: " . DBI->errstr );
 
-my $ignore_table_statement = "CREATE TEMP TABLE tattler_ignore_list(report_name VARCHAR,system_id BIGINT, copy_id BIGINT);\n";
-if(-d $ignoredir){
-    my @ignore_files = glob $ignoredir."/*.sql";
-    # iterate over all SQl scripts in the ignore list directory
-    foreach my $sql_file (@ignore_files) {
-        open my $fh, '<', $sql_file or die "Can't open file $!";
-        $ignore_table_statement .= do { local $/; <$fh> };
-    }
-
-}
-else{
-    print("Ignore list not found, creating directory.\n");
-    mkdir $ignoredir;
-    
-}
-
-# create directory to put script in, it must be hosted along with the web files.
-unless(-d $ignorephpdir){
-     print("Ignore script not found at $ignorephpdir, creating directory.\n");
-    mkdir $ignorephpdir;
-    my $tt = Template->new({
-        INTERPOLATE  => 1
-        }) || die "$Template::ERROR\n"; 
-    my $result = {};
-    $result->{ignore_table} = "tattler_ignore_list";
-    $result->{output_dir} = File::Spec->rel2abs($ignoredir);
-    $tt->process($ignorephp.".tt2", $result,$ignorephpabs)
-    || die $tt->error(), "\n";
-}
-
-# relation needs to be created even if it's empty 
-my $ign_st = $dbh->prepare($ignore_table_statement);
-print("Creating ignore table\n");
-$ign_st->execute();
-# get org unit name and shortnames
+# get org unit names and shortnames
 my $org_st = $dbh->prepare("select * from actor.org_unit");
 my %org_name; 
 my %org_shortname; 
@@ -173,7 +132,7 @@ foreach my $sql_file (@files) {
             print $current_file "<a href=\"index.html\">Return to index</a>";
             print $current_file "<hr/>";
             # create form for user created ignore list
-            print $current_file "<form action=\"$ignorephpurl\" method=\"POST\" id=\"ignoreForm\">";
+            print $current_file "<form action=\"$tattler_url\" method=\"POST\" id=\"ignoreForm\">";
             print $current_file "<p>Check the boxes within the table to ignore to a copy. That copy will not appear on the next report that is generated.</p>";          
             print $current_file "<input type=\"hidden\" id=\"reportName\" name=\"reportName\" value=\"$report_title\">";
             print $current_file "<input type=\"hidden\" id=\"systemID\" name=\"systemID\" value=\"$current_system\">";
