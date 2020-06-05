@@ -6,7 +6,7 @@ use Net::OpenSSH;
 use Config::Tiny;
 use File::Spec;
 use File::Basename;
-use File::Path qw(remove_tree);
+use File::Path qw(remove_tree rmtree);
 
 my $config = Config::Tiny->read( "tattler.ini", 'utf8' );
 #ssh host
