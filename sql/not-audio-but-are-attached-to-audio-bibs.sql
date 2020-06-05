@@ -35,5 +35,5 @@ ac.circ_modifier not in ( $$AudioBooks$$,$$CD$$ )
 group by bre.id,ac.id,bre.marc,crtr.id,edtr.id,ac.circ_lib;
 
 select * from (select id as system_id from actor.org_unit where parent_ou = 1) as systems
-join lateral ( select non_audio_copies.*,aou.name from non_audio_copies join actor.org_unit aou on aou.id = circ_lib where copy_id not in (select copy_id from config.tattler_ignore_list where system_id = system_id and report_name = ?) and (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id limit ?) as p on true
+join lateral ( select non_audio_copies.*,aou.name from non_audio_copies join actor.org_unit aou on aou.id = circ_lib where copy_id not in (select target_copy from config.tattler_ignore_list where org_unit = system_id and report_name = ?) and (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id limit ?) as p on true
 order by system_id;
