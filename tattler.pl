@@ -206,7 +206,7 @@ foreach my $current_system (keys %org_shortname){
     my $current_folder = "$output_folder/$org_shortname{$current_system}";
     if(-d $current_folder){
             # add this system to the root index
-            $index_data .= "<li><a href=\"/$org_shortname{$current_system}\">$org_shortname{$current_system}</a></li>";
+            $index_data .= "<li><a href=\"$org_shortname{$current_system}\">$org_shortname{$current_system}</a></li>";
             my @report_files;
             opendir(DIR, $current_folder) or die $!;
             
