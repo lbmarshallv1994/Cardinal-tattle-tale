@@ -79,7 +79,7 @@ BRE.ID IN
 )
 order by 1;
 select * from (select id as system_id from actor.org_unit where parent_ou = 1) as systems
-join lateral ( select vid_mis.* from vid_mis where copy_id not in (select copy_id from tattler_ignore_list where system_id = system_id and report_name = ?) and (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id limit ?
+join lateral ( select vid_mis.* from vid_mis where copy_id not in (select copy_id from config.tattler_ignore_list where system_id = system_id and report_name = ?) and (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id limit ?
 ) as p on true
 
 order by system_id;
