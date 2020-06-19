@@ -48,4 +48,4 @@ OR
 group by bre.id,ac.id,bre.marc,creator_id,editor_id, ac.circ_lib;
 
 select * from (select id as system_id from actor.org_unit where parent_ou = 1) as systems
-join lateral ( select audio_copies.*,aou.name from audio_copies join actor.org_unit aou on aou.id = circ_lib where (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id and copy_id not in (select target_copy from config.tattler_ignore_list where org_unit = system_id and report_name = ?) limit ?) as p on true order by system_id;
+join lateral ( select audio_copies.*,aou.name from audio_copies join actor.org_unit aou on aou.id = circ_lib where (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id and copy_id not in (select target_copy from tattler.ignore_list where org_unit = system_id and report_name = ?) limit ?) as p on true order by system_id;

@@ -37,7 +37,7 @@ order by ac.edit_date desc;
 select * from (select id as system_id from actor.org_unit where parent_ou = 1) as systems
 join lateral (
 select * from lp_bibs 
-where copy_id not in (select target_copy from config.tattler_ignore_list where org_unit = system_id and report_name = ?) and (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id
+where copy_id not in (select target_copy from tattler.ignore_list where org_unit = system_id and report_name = ?) and (select id from actor.org_unit_ancestor_at_depth(circ_lib, 1)) = system_id
 limit ?
 ) p on true
 order by system_id;
